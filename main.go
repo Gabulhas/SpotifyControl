@@ -19,6 +19,7 @@ import (
 	"log"
 
 	"github.com/Gabulhas/spotify_controller/cmd"
+	"github.com/Gabulhas/spotify_controller/connection"
 	"github.com/spf13/viper"
 )
 
@@ -33,5 +34,6 @@ func init() {
 }
 
 func main() {
+	connection.GetSession()
 	cmd.Execute()
 }

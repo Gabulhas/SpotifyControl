@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/chromedp/cdproto/storage"
 	"github.com/chromedp/chromedp"
 	"github.com/spf13/viper"
 )
@@ -12,10 +13,22 @@ var LOGINURL string = `https://accounts.spotify.com/en/login?continue=https:%2F%
 var USERNAMEINPUT string = "#login-username"
 var PASSWORDINPUT string = "#login-password"
 
+type configType struct {
+	AccessToken                      string `json:"accessToken"`
+	AccessTokenExpirationTimestampMs int    `json:"accessTokenExpirationTimestampMs"`
+}
+
 func GetToken(s *session) {
 
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", false),
+	)
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
 	// create context
-	ctx, cancel := chromedp.NewContext(context.Background(), chromedp.WithDebugf(log.Printf))
+	ctx, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
 	defer cancel()
 
 	username, okUsername := viper.Get("USERNAME").(string)
@@ -29,15 +42,17 @@ func GetToken(s *session) {
 		login(
 			username,
 			password,
+			s,
 		),
 	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 }
 
-func login(username, password string) chromedp.Tasks {
+func login(username, password string, s *session) chromedp.Tasks {
 
 	return chromedp.Tasks{
 		chromedp.Navigate(LOGINURL),
@@ -45,5 +60,22 @@ func login(username, password string) chromedp.Tasks {
 		chromedp.SendKeys(USERNAMEINPUT, username),
 		chromedp.SendKeys(PASSWORDINPUT, password),
 		chromedp.Click("#login-button"),
+		chromedp.WaitVisible(".Root__main-view"),
+		chromedp.Evaluate("JSON.parse(document.getElementById('config').text.trim())", s),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			result, err := storage.GetCookies().Do(ctx)
+
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				for _, cookie := range result {
+					if cookie.Name == "sp_dc" {
+						s.RefreshToken = cookie.Value
+						break
+					}
+				}
+			}
+			return err
+		}),
 	}
 }

@@ -28,11 +28,14 @@ import (
 
 var cfgFile string
 
+var IsInteractive bool
+
 var rootCmd = &cobra.Command{
 	Use:   "spotify_controller",
 	Short: "Control your Spotify via CLI",
 	Long:  `Control your Spotify via CLI`,
 	Run: func(cmd *cobra.Command, args []string) {
+		IsInteractive = true
 		commands := cmd.Commands()
 		for true {
 			idx, err := fuzzyfinder.Find(
@@ -54,7 +57,6 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("\nSelected: %s\n", commands[idx].Use)
 			commands[idx].Run(cmd, []string{})
 
 		}

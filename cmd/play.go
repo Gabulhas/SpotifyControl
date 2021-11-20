@@ -16,8 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"bufio"
+	"log"
+	"os"
 
+	"github.com/Gabulhas/spotify_controller/connection"
 	"github.com/spf13/cobra"
 )
 
@@ -26,9 +29,7 @@ var playCmd = &cobra.Command{
 	Use:   "play",
 	Short: "Toggles Play.",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("play called")
-	},
+	Run:   play_func,
 }
 
 func init() {
@@ -43,4 +44,23 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// playCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func play_func(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		if text == "" {
+			log.Fatal("This command requires at least one argument or input on stdin.")
+		}
+		PlayByUri(text)
+		log.Fatal("This command requires at least one argument (URI)")
+	} else {
+		PlayByUri(args[0])
+	}
+
+}
+
+func PlayByUri(uri string) {
+	connection.GetSession().PlayType(uri)
 }
