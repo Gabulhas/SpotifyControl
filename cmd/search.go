@@ -136,7 +136,7 @@ func track_display(resp model.TrackResponse) string {
 			if item.Name == "" {
 				continue
 			}
-			result_string = result_string + fmt.Sprintf("%s - %s - %s - %s\n", item.Name, artists_to_list(item.Artists), item.Album.Name, item.URI)
+			result_string = result_string + fmt.Sprintf("%s - %s - %s - %s\n", item.Name, model.Artists_to_list(item.Artists), item.Album.Name, item.URI)
 		}
 		fmt.Println(result_string)
 		return ""
@@ -146,7 +146,7 @@ func track_display(resp model.TrackResponse) string {
 		resp.Tracks.Items,
 		func(i int) string {
 			item := resp.Tracks.Items[i]
-			artistList := artists_to_list(item.Artists)
+			artistList := model.Artists_to_list(item.Artists)
 			return fmt.Sprintf("%s - %s", artistList, item.Name)
 		},
 		fuzzyfinder.WithPreviewWindow(func(i, width, height int) string {
@@ -156,7 +156,7 @@ func track_display(resp model.TrackResponse) string {
 
 			//TODO: remove duplicated code
 			item := resp.Tracks.Items[i]
-			artistList := artists_to_list(item.Artists)
+			artistList := model.Artists_to_list(item.Artists)
 
 			return fmt.Sprintf(
 				"Artist(s): %s\nTrack: %s\nAlbum: %s\nDuration %s\n",
@@ -221,7 +221,8 @@ func album_display(resp model.AlbumResponse) string {
 			if item.Name == "" {
 				continue
 			}
-			result_string = result_string + fmt.Sprintf("%s - %s - %s - %s\n", item.Name, artists_to_list(item.Artists), item.Type, item.URI)
+			result_string = result_string + fmt.Sprintf("%s - %s - %s - %s\n",
+				item.Name, model.Artists_to_list(item.Artists), item.Type, item.URI)
 		}
 		fmt.Println(result_string)
 		return ""
@@ -230,7 +231,7 @@ func album_display(resp model.AlbumResponse) string {
 		resp.Albums.Items,
 		func(i int) string {
 			item := resp.Albums.Items[i]
-			artists := artists_to_list(item.Artists)
+			artists := model.Artists_to_list(item.Artists)
 			return fmt.Sprintf("%s - %s", item.Name, artists)
 		},
 		fuzzyfinder.WithPreviewWindow(func(i, width, height int) string {
@@ -238,9 +239,8 @@ func album_display(resp model.AlbumResponse) string {
 				return ""
 			}
 
-			//TODO: remove duplicated code
 			item := resp.Albums.Items[i]
-			artists := artists_to_list(item.Artists)
+			artists := model.Artists_to_list(item.Artists)
 
 			return fmt.Sprintf(
 				"Name: %s\nArtists: %s\nAlbum type: %s\nRelease Date: %s\nType: %s",
@@ -301,15 +301,4 @@ func playlist_display(resp model.PlaylistResponse) string {
 	}
 	return resp.Playlists.Items[idx].URI
 
-}
-
-func artists_to_list(artists []model.Artist) string {
-	artistList := ""
-	for i, artist := range artists {
-		if i != 0 {
-			artistList = artistList + ","
-		}
-		artistList = artistList + artist.Name
-	}
-	return artistList
 }

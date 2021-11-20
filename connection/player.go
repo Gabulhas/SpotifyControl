@@ -84,28 +84,11 @@ func (s *session) PlayType(uri string) {
 */
 
 func (s *session) PlayPause() {
-
 	action := "play"
-	if s.GetStatus().IsPlaying {
+	if s.GetIsPlaying() {
 		action = "pause"
 	}
-	query := "https://" + PLAYERURL + "/" + action
-	fmt.Println(query)
-	req, err := http.NewRequest(
-		"PUT",
-		query,
-		nil,
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	addHeaders(req, *s)
-
-	_, err = s.HttpClient.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	s.Action(action, "PUT")
 }
 
 func (s *session) GetStatus() model.State {
@@ -135,4 +118,74 @@ func (s *session) GetStatus() model.State {
 	}
 	return responseState
 
+}
+
+func (s *session) Skip() {
+	s.Action("next", "POST")
+}
+
+func (s *session) Back() {
+	s.Action("previous", "POST")
+}
+
+func (s *session) Action(action, reqtype string) {
+	query := "https://" + PLAYERURL + "/" + action
+	fmt.Println(query)
+	req, err := http.NewRequest(
+		reqtype,
+		query,
+		nil,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	addHeaders(req, *s)
+
+	_, err = s.HttpClient.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func (s *session) GetDuration() int {
+	return s.GetStatus().Item.DurationMs
+
+}
+
+func (s *session) GetPlaybackName() string {
+	return s.GetStatus().Item.Name
+}
+
+func (s *session) GetPlaybackAlbumName() string {
+	return s.GetStatus().Item.Album.Name
+}
+
+func (s *session) GetPlaybackArtists() string {
+	return model.Artists_to_list(s.GetStatus().Item.Artists)
+}
+
+func (s *session) GetProgress() int {
+	return s.GetStatus().ProgressMs
+}
+
+func (s *session) GetProgressPercent() int {
+	status := s.GetStatus()
+	return (status.ProgressMs * 100) / status.Item.DurationMs
+}
+
+func (s *session) GetRepeateState() string {
+	return s.GetStatus().RepeatState
+}
+
+func (s *session) GetShuffleState() bool {
+	return s.GetStatus().ShuffleState
+}
+
+func (s *session) GetVolume() int {
+	return s.GetStatus().Device.VolumePercent
+}
+
+func (s *session) GetIsPlaying() bool {
+	return s.GetStatus().IsPlaying
 }

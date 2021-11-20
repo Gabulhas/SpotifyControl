@@ -249,3 +249,14 @@ type State struct {
 	} `json:"actions"`
 	IsPlaying bool `json:"is_playing"`
 }
+
+func Artists_to_list(artists []Artist) string {
+	artistList := ""
+	for i, artist := range artists {
+		if i != 0 {
+			artistList = artistList + ","
+		}
+		artistList = artistList + artist.Name
+	}
+	return artistList
+}
