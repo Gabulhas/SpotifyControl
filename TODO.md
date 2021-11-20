@@ -1,0 +1,20 @@
+# TODO
+- Deal with Spotify Session
+- Add the following commands
+    - Connected Devices
+    - Get Duration
+    - Get Playback
+    - Get Progress
+    - Get ProgressPercent
+    - Get RepeatState
+    - Get ShuffleState
+    - Get Volume
+    - Is Playing
+    - Play
+    - Play_pause
+    - Search
+    - Set Progress
+    - Set Repeat
+    - Set Shuffle
+    - Set Volume
+    - Transfer
